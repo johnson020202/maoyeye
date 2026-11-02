@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Smiley Sans";
+  src: url("smiley-sans.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   --bg-1: #f4ead6;
   --bg-2: #e8d9bd;
@@ -8,6 +16,7 @@
   --red: #b0342a;
   --red-soft: rgba(176, 52, 42, 0.22);
   --hair: rgba(120, 92, 56, 0.16);
+  --font: "Smiley Sans", -apple-system, "PingFang SC", "Noto Sans SC", "MiSans", sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,7 +29,7 @@ body {
     radial-gradient(110% 80% at 100% 100%, #e2d0ae 0%, transparent 60%),
     linear-gradient(165deg, var(--bg-1), var(--bg-2));
   color: var(--ink);
-  font-family: -apple-system, "PingFang SC", "Noto Sans SC", "MiSans", "Microsoft YaHei", sans-serif;
+  font-family: var(--font);
   overscroll-behavior: none;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
@@ -51,7 +60,7 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: calc(10px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom));
+  padding: 12px 14px 14px;
 }
 
 /* ---------- 顶栏 ---------- */
@@ -72,23 +81,23 @@ body::before {
   border-radius: 9px;
   background: linear-gradient(155deg, #c14438, #97281f);
   color: #fff8ec;
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
-  font-size: 18px;
+  font-family: var(--font);
+  font-size: 19px;
   line-height: 30px;
   text-align: center;
   box-shadow: 0 4px 10px rgba(150, 40, 30, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .wordmark {
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", Georgia, serif;
-  font-size: 16px;
-  letter-spacing: 0.2em;
+  font-family: var(--font);
+  font-size: 17px;
+  letter-spacing: 0.16em;
   color: #3a3127;
 }
 
 .meta {
   font-size: 11px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -132,13 +141,8 @@ body::before {
   margin-top: 10px;
 }
 
-.note-wrap {
-  margin-top: 24px;
-  padding-top: 0;
-}
-
 .mark {
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
+  font-family: var(--font);
   font-size: 54px;
   line-height: 0.55;
   height: 26px;
@@ -147,11 +151,11 @@ body::before {
 }
 
 .quote {
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+  font-family: var(--font);
   font-size: 22px;
-  font-size: clamp(22px, 6.1vw, 31px);
-  line-height: 1.82;
-  letter-spacing: 0.025em;
+  font-size: clamp(23px, 6.2vw, 32px);
+  line-height: 1.72;
+  letter-spacing: 0.035em;
   text-align: justify;
   color: var(--ink);
 }
@@ -163,15 +167,15 @@ body::before {
   justify-content: flex-end;
   align-items: baseline;
   gap: 2px 8px;
-  font-family: "Songti SC", "STSong", "Noto Serif CJK SC", serif;
-  font-size: 14.5px;
-  line-height: 1.65;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
   letter-spacing: 0.03em;
   color: var(--red);
 }
 
 .attrib-date {
-  font-family: -apple-system, "PingFang SC", "Noto Sans SC", "MiSans", sans-serif;
+  font-family: var(--font);
   font-size: 12.5px;
   letter-spacing: 0.02em;
   color: var(--muted);
@@ -180,7 +184,10 @@ body::before {
 
 /* ---------- 编者注 ---------- */
 
-.note-wrap { margin-top: auto; padding-top: 26px; }
+.note-wrap {
+  margin-top: 24px;
+  padding-top: 0;
+}
 
 .divider {
   position: relative;
@@ -216,9 +223,9 @@ body::before {
 }
 
 .note {
-  font-size: 13.5px;
-  line-height: 1.92;
-  letter-spacing: 0.015em;
+  font-size: 14px;
+  line-height: 1.9;
+  letter-spacing: 0.025em;
   text-align: justify;
   color: var(--ink-soft);
 }
@@ -236,12 +243,11 @@ body::before {
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: cover;
-  object-position: 50% 42%;
+  object-position: 50% 40%;
   border: 3px solid #fffdf7;
   box-shadow:
     0 0 0 1px rgba(176, 52, 42, 0.38),
     0 10px 22px rgba(90, 66, 40, 0.2);
-  filter: saturate(0.97) contrast(1.02);
 }
 
 /* ---------- 底栏 ---------- */
@@ -262,17 +268,15 @@ body::before {
   color: var(--red);
   border-radius: 999px;
   padding: 9px 14px;
-  font-size: 12.5px;
-  letter-spacing: 0.08em;
-  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  font-family: var(--font);
   display: inline-flex;
   align-items: center;
   gap: 5px;
   transition: transform 0.16s ease, background 0.16s ease, opacity 0.16s ease;
   -webkit-tap-highlight-color: transparent;
 }
-
-.pill span { font-size: 12.5px; }
 
 #prevBtn { justify-self: start; }
 #nextBtn { justify-self: end; }
@@ -283,7 +287,7 @@ body::before {
 
 .hint {
   font-size: 10.5px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   color: var(--muted);
   text-align: center;
   white-space: nowrap;

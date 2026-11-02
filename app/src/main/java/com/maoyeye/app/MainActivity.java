@@ -7,9 +7,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -26,6 +28,11 @@ public class MainActivity extends Activity {
         configureWindow();
         updater = new HotUpdater(this);
 
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(PAPER);
+        // 资源高度作为兜底：即使系统没有派发 insets，也不会把内容顶到状态栏下面
+        root.setPadding(0, systemDimen("status_bar_height"), 0, systemDimen("navigation_bar_height"));
+
         webView = new WebView(this);
         webView.setBackgroundColor(PAPER);
 
@@ -37,7 +44,6 @@ public class MainActivity extends Activity {
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setTextZoom(100);
-
         if (Build.VERSION.SDK_INT >= 26) {
             settings.setSafeBrowsingEnabled(false);
         }
@@ -45,33 +51,14 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
-        applySystemBarInsets(webView);
-        setContentView(webView);
+        root.addView(webView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT));
 
-        webView.loadUrl(updater.activeIndexUrl());
-        checkHotUpdate();
-    }
+        setContentView(root);
 
-    private void configureWindow() {
-        getWindow().setBackgroundDrawable(new ColorDrawable(PAPER));
-
-        if (Build.VERSION.SDK_INT >= 21) {
-            getWindow().setStatusBarColor(Color.TRANSPARENT);
-            getWindow().setNavigationBarColor(Color.TRANSPARENT);
-        }
-        if (Build.VERSION.SDK_INT >= 30) {
-            getWindow().setDecorFitsSystemWindows(false);
-        }
-
-        int flags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        if (Build.VERSION.SDK_INT >= 26) {
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        }
-        getWindow().getDecorView().setSystemUiVisibility(flags);
-    }
-
-    private void applySystemBarInsets(final WebView view) {
-        view.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+        final FrameLayout container = root;
+        container.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override
             public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
                 int top = 0;
@@ -84,11 +71,48 @@ public class MainActivity extends Activity {
                     top = insets.getSystemWindowInsetTop();
                     bottom = insets.getSystemWindowInsetBottom();
                 }
-                v.setPadding(0, top, 0, bottom);
+                if (top > 0 || bottom > 0) {
+                    v.setPadding(0, top, 0, bottom);
+                }
                 return insets;
             }
         });
-        view.requestApplyInsets();
+        container.requestApplyInsets();
+
+        webView.loadUrl(updater.activeIndexUrl());
+        checkHotUpdate();
+    }
+
+    private void configureWindow() {
+        getWindow().setBackgroundDrawable(new ColorDrawable(PAPER));
+        if (Build.VERSION.SDK_INT >= 21) {
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        }
+
+        if (Build.VERSION.SDK_INT >= 30) {
+            getWindow().setDecorFitsSystemWindows(false);
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                int mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                        | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                controller.setSystemBarsAppearance(mask, mask);
+            }
+        } else {
+            int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            if (Build.VERSION.SDK_INT >= 26) {
+                flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            }
+            getWindow().getDecorView().setSystemUiVisibility(flags);
+        }
+    }
+
+    private int systemDimen(String name) {
+        int id = getResources().getIdentifier(name, "dimen", "android");
+        return id > 0 ? getResources().getDimensionPixelSize(id) : 0;
     }
 
     private void checkHotUpdate() {

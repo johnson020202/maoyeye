@@ -37,6 +37,10 @@
   var versionMatch = /[?&]v=(\d+)/.exec(window.location.search || '');
   var webVersion = versionMatch ? parseInt(versionMatch[1], 10) : 0;
 
+  if (window.document && document.fonts && document.fonts.load) {
+    document.fonts.load('16px "Smiley Sans"').catch(function () {});
+  }
+
   function defaultHint() {
     return '左右滑动 · 共 ' + cards.length.toLocaleString('en-US') + ' 条';
   }

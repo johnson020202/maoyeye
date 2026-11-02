@@ -26,27 +26,47 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Build debug APK
-        run: gradle assembleDebug --no-daemon --stacktrace
+      - name: Decode signing keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/maoyeye.p12"
+
+      - name: Build release APK
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Align and sign APK
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.KEY_PASS }}
+        run: |
+          BT="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          "$BT/zipalign" -p -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/maoyeye-aligned.apk"
+          "$BT/apksigner" sign \
+            --ks "$RUNNER_TEMP/maoyeye.p12" \
+            --ks-pass "pass:$KEYSTORE_PASS" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --key-pass "pass:$KEY_PASS" \
+            --out maoyeye.apk "$RUNNER_TEMP/maoyeye-aligned.apk"
+          "$BT/apksigner" verify --print-certs maoyeye.apk
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: maoyeye-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: maoyeye.apk
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.0
-          name: maoyeye v1.1.0
+          tag_name: v1.2.0
+          name: maoyeye v1.2.0
           body: |
-            v1.1.0
+            v1.2.0
 
-            - 界面重做：纸张卡片、印章标识、字号与层级调整，适配全面屏与系统栏
-            - 修复左右滑动无反应：改用 touch 事件判定横向手势，跟手位移 + 松手翻页
-            - 新增“上一条 / 下一条”按钮，作为手势的兜底入口
-            - 应用名改为 maoyeye，新增启动图标
-            - 接入热更新：启动时检查 update/version.json，有新版自动下载并切换，无需重装 APK
-            - 目标 API 35，适配 Android 15+ 的全面屏强制边到边
-          files: app/build/outputs/apk/debug/app-debug.apk
+            - 修复状态栏遮住标题：用系统栏 inset 给 WebView 容器加安全带，兼顾 HyperOS / Android 15+ 强制边到边
+            - 换成标志性红底五角星头像，告别模糊翻拍裁切
+            - 全面改用开源字体「得意黑」（Smiley Sans，SIL OFL 1.1）
+            - 产物改为正式签名 APK：maoyeye.apk（不再是 app-debug.apk）
+            - 包内版本 v1.2.0，内容清单 v5，支持应用内热更新
+          files: maoyeye.apk

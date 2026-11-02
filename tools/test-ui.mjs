@@ -91,6 +91,13 @@ await sleep(1200);
 const total = await evalJs('window.MAO_CARDS ? window.MAO_CARDS.length : -1');
 check('数据已加载 18506 条', total === 18506, 'total=' + total);
 
+await sleep(800);
+const fontOk = await evalJs("document.fonts.check('16px \\\"Smiley Sans\\\"')");
+check('得意黑字体已加载', fontOk === true, 'loaded=' + fontOk);
+
+const portraitOk = await evalJs('document.getElementById("portrait").naturalWidth > 0');
+check('头像已加载', portraitOk === true);
+
 const q1 = await evalJs('document.getElementById("quote").textContent');
 check('首屏有语录', !!q1 && q1.length > 8);
 
