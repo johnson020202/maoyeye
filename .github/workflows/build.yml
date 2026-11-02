@@ -24,7 +24,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: '8.9'
 
       - name: Build debug APK
         run: gradle assembleDebug --no-daemon --stacktrace
@@ -38,13 +38,15 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: 毛选语录 v1.0.0
+          tag_name: v1.1.0
+          name: maoyeye v1.1.0
           body: |
-            首个可测试版本。
+            v1.1.0
 
-            - 18,506 条毛选语录（原文 + 篇名 + 日期 + 毛选编者注）
-            - 每次打开随机一张，洗牌抽牌，连续 10,000 次以上不重样
-            - 左滑下一条，右滑上一条，可回看之前随机到的内容
-            - 完全离线，无网络权限
+            - 界面重做：纸张卡片、印章标识、字号与层级调整，适配全面屏与系统栏
+            - 修复左右滑动无反应：改用 touch 事件判定横向手势，跟手位移 + 松手翻页
+            - 新增“上一条 / 下一条”按钮，作为手势的兜底入口
+            - 应用名改为 maoyeye，新增启动图标
+            - 接入热更新：启动时检查 update/version.json，有新版自动下载并切换，无需重装 APK
+            - 目标 API 35，适配 Android 15+ 的全面屏强制边到边
           files: app/build/outputs/apk/debug/app-debug.apk

@@ -3,36 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#f5efe2">
-<title>毛选语录</title>
+<meta name="theme-color" content="#efe3cc">
+<title>maoyeye</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="app">
-  <header>
-    <span class="brand">毛选语录</span>
-    <span id="counter" class="counter"></span>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="seal">毛</span>
+      <span class="wordmark">maoyeye</span>
+    </div>
+    <div class="meta" id="meta">已读 1 条</div>
   </header>
 
-  <main id="stage">
-    <article id="card" class="card">
-      <p id="quote" class="quote"></p>
-      <p id="attrib" class="attrib"></p>
-      <div class="rule"></div>
-      <div class="bottom">
-        <div id="noteWrap" class="note-wrap">
-          <div class="note-label">编者注</div>
-          <p id="note" class="note"></p>
+  <main class="stage" id="stage">
+    <article class="card" id="card">
+      <div class="card-inner">
+        <div class="quote-block">
+          <div class="mark">“</div>
+          <p class="quote" id="quote"></p>
+          <p class="attrib">
+            <span class="attrib-title" id="attribTitle"></span>
+            <span class="attrib-date" id="attribDate"></span>
+          </p>
         </div>
-        <img id="portrait" class="portrait" src="avatar.jpg" alt="毛泽东">
+
+        <div class="note-wrap" id="noteBlock">
+          <div class="divider"><i></i></div>
+          <div class="note-row">
+            <div class="note-block">
+              <div class="note-label">编者注</div>
+              <p class="note" id="note"></p>
+            </div>
+            <div class="portrait-ring">
+              <img class="portrait" id="portrait" src="avatar.jpg" alt="">
+            </div>
+          </div>
+        </div>
       </div>
     </article>
   </main>
 
-  <footer>
-    <span id="hint" class="hint">左滑下一条 · 右滑上一条</span>
-    <span class="count-label" id="countLabel"></span>
+  <footer class="navbar">
+    <button class="pill" id="prevBtn" type="button">‹<span>上一条</span></button>
+    <span class="hint" id="hint">左右滑动翻页</span>
+    <button class="pill" id="nextBtn" type="button"><span>下一条</span>›</button>
   </footer>
+
 </div>
 
 <script src="cards.js"></script>

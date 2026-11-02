@@ -1,30 +1,50 @@
-# 毛选语录（maoyeye）
+# maoyeye
 
-一个极简的安卓 App：每次打开随机显示一段《毛泽东选集》原文，配篇名、日期和毛选编者注；左滑看下一条，右滑回看上一条。完全离线，无网络权限。
+一个极简的安卓应用：每次打开随机显示一段《毛泽东选集》原文，配篇名、日期和毛选编者注；左滑下一条，右滑回到上一条。支持应用内热更新，内容更新不需要重新安装 APK。
 
 ## 下载安装
 
 - 最新 APK：[Releases](https://github.com/johnson020202/maoyeye/releases/latest) → `app-debug.apk`
-- Android 5.0（API 21）及以上，约 1.5 MB。
+- Android 7.0（API 24）及以上，约 1.1 MB。
 
 ## 内容与去重
 
 - 语料来自开源全文仓库 [weiyinfu/MaoZeDongAnthology](https://github.com/weiyinfu/MaoZeDongAnthology)（229 篇，约 123 万字）。
 - 按“段落 + 句子”两级抽取并去重，得到 **18,506 条**互不相同的原文卡片，覆盖 225 个篇目。
-- 首页采用**洗牌抽牌**：一副牌抽完之前绝不重复，因此连续 **10,000 次以上不重样**；抽满 18,506 次后才重新洗牌，且新一轮第一张不会与上一张相同。
-- 当前版本的“解读”使用《毛泽东选集》各篇的**官方编者注**（写作背景、发表情况），不是 AI 生成文字。后续版本会补人工撰写的现实启示。
+- 首屏采用**洗牌抽牌**：一副牌抽完之前绝不重复，因此连续 **10,000 次以上不重样**；抽满 18,506 次后才重新洗牌，且新一轮第一张不会与上一张相同。
+- 当前版本的“解读”使用《毛泽东选集》各篇的**官方编者注**（写作背景、发表情况），不是 AI 生成文字。
 
 ## 交互
 
 - 打开即随机抽一张，历史记录保存在本地（localStorage），下次打开仍是新的一张。
-- 左滑 = 下一条（历史里没有就抽新牌），右滑 = 上一条。
+- **左滑** = 下一条（历史末尾则抽新牌），**右滑** = 上一条；底部另有“上一条 / 下一条”按钮。
+- 手势实现使用 touch 事件并在判定横向意图后 `preventDefault()`，避免被 WebView 的滚动接管；拖动时卡片跟手位移，松手超过阈值或速度足够即翻页。
 - 桌面预览可用方向键 ← →。
+
+## 热更新
+
+应用启动时会在后台依次请求以下地址的 `version.json`：
+
+1. `https://cdn.jsdelivr.net/gh/johnson020202/maoyeye@main/update/version.json`
+2. `https://raw.githubusercontent.com/johnson020202/maoyeye/main/update/version.json`
+
+若远端 `version` 大于当前版本，则下载同目录下的 `web.zip`，校验 `sha256`、解压到应用私有目录并切换加载；失败时静默回退到 APK 内置资源，不影响离线使用。页面右上角会显示当前内容版本（如 `· v3`），更新成功会弹出提示。
+
+发布一次热更新：
+
+```bash
+# 1. 修改 assets 下的 H5 文件
+# 2. 重新打包
+cd app/src/main/assets
+zip -r ../../../update/web.zip index.html style.css app.js deck.js cards.js avatar.jpg
+# 3. 计算 sha256，写进 update/version.json（version 递增）
+```
 
 ## 从源码构建
 
-仓库自带 GitHub Actions（`.github/workflows/build.yml`）：push 到 `main` 后自动用 JDK 17 + Gradle 8.7 构建 debug APK，并发布到 Releases。
+仓库自带 GitHub Actions（`.github/workflows/build.yml`）：push 到 `main` 后自动用 JDK 17 + Gradle 8.9 构建 debug APK，并发布到 Releases。
 
-本地构建需要 JDK 17 与 Android SDK：
+本地构建需要 JDK 17 与 Android SDK 35：
 
 ```bash
 gradle assembleDebug
@@ -36,19 +56,16 @@ gradle assembleDebug
 
 ```
 app/src/main/assets/    H5 页面（index.html / style.css / app.js / deck.js / cards.js / avatar.jpg）
-app/src/main/java/      WebView 壳（MainActivity.java）
-tools/                  语料抽取脚本（extract_cards.mjs / extract_sent.mjs）
+app/src/main/java/      WebView 壳（MainActivity.java / HotUpdater.java）
+update/                 热更新清单与更新包
+tools/                  语料抽取、抽卡测试、界面触摸测试、API 推送脚本
 ```
 
-## 数据再生成
+## 测试
 
 ```bash
-# 1. 取得全文
-git clone https://github.com/weiyinfu/MaoZeDongAnthology.git
-# 2. 抽取（脚本内 SRC 指向 …/src 目录）
-node tools/extract_cards.mjs
-node tools/extract_sent.mjs
-# 3. 合并、去重、生成 assets/cards.js
+node tools/test-deck.cjs   # 抽卡引擎：12000 次连续抽取无重复
+node tools/test-ui.mjs     # 无头浏览器触摸滑动 / 按钮 / 竖向不误触 / 横向溢出
 ```
 
 ## 版权说明

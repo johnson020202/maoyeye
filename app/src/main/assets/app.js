@@ -10,9 +10,8 @@
 
   var storage = null;
   try {
-    var probe = '__maoyeye_probe__';
-    window.localStorage.setItem(probe, '1');
-    window.localStorage.removeItem(probe);
+    window.localStorage.setItem('__maoyeye_probe__', '1');
+    window.localStorage.removeItem('__maoyeye_probe__');
     storage = window.localStorage;
   } catch (e) {
     storage = null;
@@ -22,95 +21,196 @@
 
   var cardEl = document.getElementById('card');
   var quoteEl = document.getElementById('quote');
-  var attribEl = document.getElementById('attrib');
+  var attribTitleEl = document.getElementById('attribTitle');
+  var attribDateEl = document.getElementById('attribDate');
   var noteEl = document.getElementById('note');
-  var noteWrap = document.getElementById('noteWrap');
-  var counterEl = document.getElementById('counter');
+  var noteBlock = document.getElementById('noteBlock');
+  var metaEl = document.getElementById('meta');
   var hintEl = document.getElementById('hint');
   var stageEl = document.getElementById('stage');
   var portraitEl = document.getElementById('portrait');
-  var countLabelEl = document.getElementById('countLabel');
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
 
-  countLabelEl.textContent = '共 ' + cards.length.toLocaleString('en-US') + ' 条';
+  var hintTimer = null;
 
-  var hintShown = false;
+  var versionMatch = /[?&]v=(\d+)/.exec(window.location.search || '');
+  var webVersion = versionMatch ? parseInt(versionMatch[1], 10) : 0;
+
+  function defaultHint() {
+    return '左右滑动 · 共 ' + cards.length.toLocaleString('en-US') + ' 条';
+  }
+  hintEl.textContent = defaultHint();
+
+  function metaText() {
+    return '已读 ' + engine.historyLength() + ' 条' + (webVersion > 0 ? ' · v' + webVersion : '');
+  }
+
+  function flashHint(text) {
+    hintEl.textContent = text;
+    if (hintTimer) clearTimeout(hintTimer);
+    hintTimer = setTimeout(function () {
+      hintEl.textContent = defaultHint();
+    }, 1400);
+  }
 
   function render(id, dir) {
     if (id < 0) return;
     var pair = cards[id];
-    var quote = pair[0];
     var article = articles[pair[1]] || { t: '', d: '', n: '' };
 
-    quoteEl.textContent = quote;
-    attribEl.textContent = '——《' + article.t + '》' + (article.d ? '（' + article.d + '）' : '');
+    quoteEl.textContent = pair[0];
+    attribTitleEl.textContent = '——《' + article.t + '》';
+    attribDateEl.textContent = article.d ? '（' + article.d + '）' : '';
+    attribDateEl.style.display = article.d ? '' : 'none';
 
     if (article.n) {
-      noteWrap.style.display = '';
+      noteBlock.style.display = '';
       noteEl.textContent = article.n;
     } else {
-      noteWrap.style.display = 'none';
-      noteEl.textContent = '';
+      noteBlock.style.display = 'none';
     }
 
-    counterEl.textContent = (engine.pos() + 1) + ' / ' + engine.historyLength();
+    metaEl.textContent = '已读 ' + engine.historyLength() + ' 条';
+    prevBtn.disabled = !engine.canPrev();
     cardEl.scrollTop = 0;
 
     if (dir && cardEl.animate) {
-      var dx = dir === 'next' ? 36 : -36;
+      var dx = dir === 'next' ? 34 : -34;
       cardEl.animate(
         [
           { opacity: 0, transform: 'translateX(' + dx + 'px)' },
           { opacity: 1, transform: 'translateX(0)' }
         ],
-        { duration: 220, easing: 'cubic-bezier(.22,.61,.36,1)' }
+        { duration: 230, easing: 'cubic-bezier(.22,.61,.36,1)' }
       );
     }
   }
 
   function go(dir) {
-    if (dir === 'next') render(engine.next(), 'next');
-    else if (engine.canPrev()) render(engine.prev(), 'prev');
-    else {
-      hintEl.textContent = '已经是最早一条了';
-      setTimeout(function () { hintEl.textContent = '左滑下一条 · 右滑上一条'; }, 1200);
+    if (dir === 'next') {
+      render(engine.next(), 'next');
+    } else if (engine.canPrev()) {
+      render(engine.prev(), 'prev');
+    } else {
+      flashHint('已经是最早一条了');
     }
   }
 
-  // 每次打开都抽一张新的
-  render(engine.open(), null);
+  // ---------- 跟手滑动 ----------
 
-  // 滑动手势：左滑下一条，右滑上一条
-  var startX = null, startY = null, tracking = false;
-  stageEl.addEventListener('pointerdown', function (e) {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    startX = e.clientX;
-    startY = e.clientY;
-    tracking = true;
-    if (!hintShown) {
-      hintShown = true;
-      hintEl.textContent = '左滑下一条 · 右滑上一条';
+  var g = { active: false, sx: 0, sy: 0, dx: 0, axis: null, t0: 0 };
+  var mouseDown = false;
+
+  function setDrag(dx) {
+    cardEl.style.transition = 'none';
+    cardEl.style.transform = 'translateX(' + dx * 0.45 + 'px)';
+    cardEl.style.opacity = String(1 - Math.min(Math.abs(dx) / 900, 0.18));
+  }
+
+  function snapBack() {
+    cardEl.style.transition = 'transform .2s cubic-bezier(.22,.61,.36,1), opacity .2s';
+    cardEl.style.transform = 'translateX(0)';
+    cardEl.style.opacity = '1';
+  }
+
+  function clearDrag() {
+    cardEl.style.transition = 'none';
+    cardEl.style.transform = 'translateX(0)';
+    cardEl.style.opacity = '1';
+  }
+
+  function start(x, y) {
+    g.active = true;
+    g.sx = x;
+    g.sy = y;
+    g.dx = 0;
+    g.axis = null;
+    g.t0 = Date.now();
+  }
+
+  // 返回 true 表示已判定为横向滑动（调用方应 preventDefault）
+  function move(x, y, ev) {
+    if (!g.active) return false;
+    var dx = x - g.sx;
+    var dy = y - g.sy;
+    if (g.axis === null && (Math.abs(dx) > 9 || Math.abs(dy) > 9)) {
+      g.axis = Math.abs(dx) > Math.abs(dy) * 1.15 ? 'h' : 'v';
     }
+    if (g.axis === 'h') {
+      g.dx = dx;
+      if (ev && ev.cancelable) ev.preventDefault();
+      setDrag(dx);
+      return true;
+    }
+    return false;
+  }
+
+  function end() {
+    if (!g.active) return;
+    g.active = false;
+    if (g.axis === 'h') {
+      var dt = Math.max(1, Date.now() - g.t0);
+      var speed = Math.abs(g.dx) / dt;
+      if (Math.abs(g.dx) > 54 || speed > 0.5) {
+        var dir = g.dx < 0 ? 'next' : 'prev';
+        clearDrag();
+        go(dir);
+        return;
+      }
+    }
+    snapBack();
+  }
+
+  stageEl.addEventListener('touchstart', function (e) {
+    if (e.touches.length !== 1) return;
+    start(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive: true });
 
-  stageEl.addEventListener('pointerup', function (e) {
-    if (!tracking) return;
-    tracking = false;
-    var dx = e.clientX - startX;
-    var dy = e.clientY - startY;
-    if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-      go(dx < 0 ? 'next' : 'prev');
-    }
+  // 必须 passive:false，横向拖动时要阻止浏览器接管手势
+  stageEl.addEventListener('touchmove', function (e) {
+    if (e.touches.length !== 1) return;
+    move(e.touches[0].clientX, e.touches[0].clientY, e);
+  }, { passive: false });
+
+  stageEl.addEventListener('touchend', end, { passive: true });
+
+  stageEl.addEventListener('touchcancel', function () {
+    g.active = false;
+    snapBack();
   }, { passive: true });
 
-  stageEl.addEventListener('pointercancel', function () { tracking = false; }, { passive: true });
+  // 桌面端鼠标拖拽
+  stageEl.addEventListener('mousedown', function (e) {
+    if (e.button !== 0) return;
+    if (e.target && e.target.closest && e.target.closest('button')) return;
+    mouseDown = true;
+    start(e.clientX, e.clientY);
+  });
+
+  window.addEventListener('mousemove', function (e) {
+    if (!mouseDown) return;
+    if (move(e.clientX, e.clientY, e)) e.preventDefault();
+  });
+
+  window.addEventListener('mouseup', function () {
+    if (!mouseDown) return;
+    mouseDown = false;
+    end();
+  });
+
+  prevBtn.addEventListener('click', function () { go('prev'); });
+  nextBtn.addEventListener('click', function () { go('next'); });
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'ArrowLeft') go('prev');
     else if (e.key === 'ArrowRight') go('next');
   });
 
-  // 头像加载失败时留一个占位，不阻塞阅读
   portraitEl.addEventListener('error', function () {
     portraitEl.style.display = 'none';
   });
+
+  // 每次打开抽一张新的
+  render(engine.open(), null);
 })();
