@@ -29,6 +29,9 @@
   var hintEl = document.getElementById('hint');
   var stageEl = document.getElementById('stage');
   var portraitEl = document.getElementById('portrait');
+  var countLabelEl = document.getElementById('countLabel');
+
+  countLabelEl.textContent = '共 ' + cards.length.toLocaleString('en-US') + ' 条';
 
   var hintShown = false;
 
