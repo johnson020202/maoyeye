@@ -16,8 +16,9 @@ const BRANCH = process.env.GH_BRANCH || 'main';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const API = 'https://api.github.com';
 
-const SKIP_DIRS = new Set(['.git', 'node_modules', 'build', '.gradle', '.idea', 'data']);
+const SKIP_DIRS = new Set(['.git', 'node_modules', 'build', '.gradle', '.idea', 'data', '.tmp-edge-profile', 'joblogs']);
 const SKIP_FILES = new Set(['local.properties']);
+const SKIP_PATTERNS = [/^joblog.*\.zip$/, /^shot.*\.png$/, /\.apk$/];
 
 async function api(urlPath, method = 'GET', body) {
   const res = await fetch(API + urlPath, {

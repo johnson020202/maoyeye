@@ -1,6 +1,0 @@
-2026/11/02-16:07:49.742 38ac Reusing MANIFEST C:\Users\Administrator\.lcode\workspace\default\maoyeye\.tmp-edge-profile\Default\Local Storage\leveldb/MANIFEST-000001
-2026/11/02-16:07:49.743 38ac Recovering log #4
-2026/11/02-16:07:49.744 38ac (ignoring error) C:\Users\Administrator\.lcode\workspace\default\maoyeye\.tmp-edge-profile\Default\Local Storage\leveldb/000004.log: dropping 32761 bytes; Corruption: partial record without end(2)
-2026/11/02-16:07:49.744 38ac Level-0 table #6: started
-2026/11/02-16:07:49.754 38ac Level-0 table #6: 77782 bytes OK
-2026/11/02-16:07:49.765 38ac Delete type=0 #4
