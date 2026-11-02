@@ -1,0 +1,176 @@
+:root {
+  --paper: #f5efe2;
+  --paper-deep: #efe6d3;
+  --ink: #24211d;
+  --ink-soft: #4a443c;
+  --muted: #7a6f60;
+  --red: #b0342a;
+  --red-soft: rgba(176, 52, 42, 0.16);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 12% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+    radial-gradient(90% 70% at 100% 100%, rgba(176, 52, 42, 0.06), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(120, 95, 60, 0.028) 0 1px, transparent 1px 4px);
+  z-index: 0;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 620px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px 6px;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.brand {
+  color: var(--red);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+}
+
+.counter { font-variant-numeric: tabular-nums; }
+
+#stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  touch-action: pan-y;
+}
+
+.card {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 26px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: none;
+}
+
+.card::-webkit-scrollbar { display: none; }
+
+.quote {
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", "Source Han Serif SC", serif;
+  font-size: clamp(21px, 5.9vw, 29px);
+  line-height: 1.85;
+  letter-spacing: 0.03em;
+  text-align: justify;
+  color: var(--ink);
+}
+
+.quote::before,
+.quote::after {
+  color: var(--red);
+  font-family: "Songti SC", "STSong", serif;
+}
+
+.quote::before { content: "“"; margin-right: 0.08em; text-indent: 0; }
+.quote::after { content: "”"; margin-left: 0.08em; }
+
+.attrib {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 15px;
+  color: var(--red);
+  text-align: right;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+
+.rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--red-soft) 20%, var(--red-soft) 80%, transparent);
+}
+
+.bottom {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.note-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.note-label {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: var(--red);
+  margin-bottom: 8px;
+}
+
+.note {
+  font-size: 14px;
+  line-height: 1.95;
+  color: var(--ink-soft);
+  text-align: justify;
+  letter-spacing: 0.02em;
+}
+
+.portrait {
+  flex: 0 0 auto;
+  width: min(34vw, 138px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 45%;
+  border: 3px solid rgba(176, 52, 42, 0.8);
+  box-shadow: 0 0 0 6px rgba(176, 52, 42, 0.07), 0 12px 26px rgba(90, 66, 40, 0.16);
+  filter: saturate(0.96) contrast(1.02);
+  align-self: flex-end;
+}
+
+footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 24px 18px;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.hint { opacity: 0.85; }
+
+.count-label { font-variant-numeric: tabular-nums; opacity: 0.7; }
