@@ -59,15 +59,16 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.3.0
-          name: maoyeye v1.3.0
+          tag_name: v1.3.1
+          name: maoyeye v1.3.1
           body: |
-            v1.3.0
+            v1.3.1
 
             - 修复 Android 17 / HyperOS 4.0 启动崩溃（getInsetsController 在 DecorView 创建前调用导致 NPE）
             - 状态栏避让改为在 setContentView 后应用系统栏外观，并兼容刘海/挖孔安全区
-            - 热更新同时检查 jsDelivr 与 raw.githubusercontent，取版本更高的清单，避免 CDN 缓存导致更新滞后
+            - 热更新新增自有杭州服务器镜像（api.dognosay.dpdns.org/maoyeye/），国内网络不再依赖 GitHub
+            - 同时检查 jsDelivr 与 raw.githubusercontent，取版本更高的清单，避免 CDN 缓存导致更新滞后
             - 头像换成 1950 年官方标准像（Wikimedia Commons，公有领域）
             - 编者注缩短为第一句，长文在标点处收口
-            - 包内版本 v1.3.0，内容清单 v6
+            - 包内版本 v1.3.1，内容清单 v6
           files: maoyeye.apk

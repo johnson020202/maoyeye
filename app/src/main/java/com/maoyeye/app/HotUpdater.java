@@ -27,6 +27,8 @@ public final class HotUpdater {
     private static final String TAG = "MaoYeyeUpdater";
 
     private static final String[] BASES = {
+            // 国内网络常把 GitHub 系域名解析到 0.0.0.0，优先走自有杭州服务器镜像
+            "https://api.dognosay.dpdns.org/maoyeye/",
             "https://cdn.jsdelivr.net/gh/johnson020202/maoyeye@main/update/",
             "https://raw.githubusercontent.com/johnson020202/maoyeye/main/update/"
     };

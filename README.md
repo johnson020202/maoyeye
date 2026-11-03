@@ -30,12 +30,13 @@
 
 ## 热更新
 
-应用启动时会在后台依次请求以下地址的 `version.json`：
+应用启动时会在后台请求以下地址的 `version.json`，并取其中版本号最高的清单：
 
-1. `https://cdn.jsdelivr.net/gh/johnson020202/maoyeye@main/update/version.json`
-2. `https://raw.githubusercontent.com/johnson020202/maoyeye/main/update/version.json`
+1. `https://api.dognosay.dpdns.org/maoyeye/version.json`（自有杭州服务器镜像，国内网络优先）
+2. `https://cdn.jsdelivr.net/gh/johnson020202/maoyeye@main/update/version.json`
+3. `https://raw.githubusercontent.com/johnson020202/maoyeye/main/update/version.json`
 
-若远端 `version` 大于当前版本，则下载同目录下的 `web.zip`，校验 `sha256`、解压到应用私有目录并切换加载；失败时静默回退到 APK 内置资源，不影响离线使用。页面右上角会显示当前内容版本（如 `· v5`），更新成功会弹出提示。
+若远端 `version` 大于当前版本，则下载同目录下的 `web.zip`，校验 `sha256`、解压到应用私有目录并切换加载；失败时静默回退到 APK 内置资源，不影响离线使用。页面右上角会显示当前内容版本（如 `· v6`），更新成功会弹出提示。
 
 发布一次热更新：
 
