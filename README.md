@@ -13,7 +13,7 @@
 - 语料来自开源全文仓库 [weiyinfu/MaoZeDongAnthology](https://github.com/weiyinfu/MaoZeDongAnthology)（229 篇，约 123 万字）。
 - 按“段落 + 句子”两级抽取并去重，得到 **18,506 条**互不相同的原文卡片，覆盖 225 个篇目。
 - 首屏采用**洗牌抽牌**：一副牌抽完之前绝不重复，因此连续 **10,000 次以上不重样**；抽满 18,506 次后才重新洗牌，且新一轮第一张不会与上一张相同。
-- 当前版本的“解读”使用《毛泽东选集》各篇的**官方编者注**（写作背景、发表情况），不是 AI 生成文字。
+- 当前版本的“解读”使用《毛泽东选集》各篇的**官方编者注**（写作背景、发表情况），不是 AI 生成文字；界面只显示第一句，长注在标点处收口。
 
 ## 交互
 
@@ -25,7 +25,7 @@
 ## 视觉
 
 - 字体：开源字体 **得意黑（Smiley Sans）**，SIL OFL 1.1，许可证见 `LICENSES/SmileySans-OFL.txt`。
-- 头像：红底五角星矢量肖像，本地打包，不联网。
+- 头像：1950 年官方标准像（Wikimedia Commons，公有领域），本地打包，不联网。
 - 全面屏适配：Activity 用 `FrameLayout` 容器承载系统栏 inset（并以 `status_bar_height` / `navigation_bar_height` 兜底），避免 Android 15+ 强制边到边时标题被状态栏遮住。
 
 ## 热更新
@@ -43,7 +43,7 @@
 # 1. 修改 assets 下的 H5 文件
 # 2. 重新打包（包含字体）
 cd app/src/main/assets
-zip -r ../../../update/web.zip index.html style.css app.js deck.js cards.js avatar.jpg smiley-sans.woff2 version.json
+zip -r ../../../../update/web.zip index.html style.css app.js deck.js cards.js avatar.jpg smiley-sans.woff2 version.json
 # 3. 计算 sha256，写进 update/version.json（version 递增）
 ```
 
@@ -78,7 +78,7 @@ node tools/test-ui.mjs     # 无头浏览器：触摸滑动 / 按钮 / 竖向不
 
 ## 版权说明
 
-《毛泽东选集》文本与编者注的著作权归原出版方；本仓库仅作个人学习与测试用途，公开分发前请自行确认授权。头像为本地打包的矢量肖像，仅作个人使用。
+《毛泽东选集》文本与编者注的著作权归原出版方；本仓库仅作个人学习与测试用途，公开分发前请自行确认授权。头像为本地打包的 1950 年官方标准像（Wikimedia Commons，公有领域）。
 
 ## License
 

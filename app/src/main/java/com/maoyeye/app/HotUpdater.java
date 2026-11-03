@@ -78,20 +78,25 @@ public final class HotUpdater {
             @Override
             public void run() {
                 try {
+                    // 两个源都查一遍取最高版本：jsDelivr 的 @main 缓存可能落后数小时，
+                    // 只取第一个成功的源会一直拿到旧清单。
                     JSONObject remote = null;
                     String base = null;
+                    int remoteVersion = -1;
                     for (String candidate : BASES) {
                         try {
-                            remote = fetchJson(candidate + "version.json");
-                            base = candidate;
-                            break;
+                            JSONObject candidateJson = fetchJson(candidate + "version.json");
+                            int candidateVersion = candidateJson.optInt("version", 0);
+                            if (candidateVersion > remoteVersion) {
+                                remote = candidateJson;
+                                base = candidate;
+                                remoteVersion = candidateVersion;
+                            }
                         } catch (Exception e) {
                             Log.w(TAG, "version endpoint failed: " + candidate + " (" + e.getMessage() + ")");
                         }
                     }
                     if (remote == null || base == null) return;
-
-                    int remoteVersion = remote.optInt("version", 0);
                     if (remoteVersion <= currentVersion()) return;
 
                     File zip = new File(ctx.getCacheDir(), "web-update.zip");

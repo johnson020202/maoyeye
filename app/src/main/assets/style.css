@@ -210,7 +210,7 @@ body::before {
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  margin-top: 18px;
+  margin-top: 16px;
 }
 
 .note-block { flex: 1 1 auto; min-width: 0; }
@@ -223,8 +223,8 @@ body::before {
 }
 
 .note {
-  font-size: 14px;
-  line-height: 1.9;
+  font-size: 13.5px;
+  line-height: 1.82;
   letter-spacing: 0.025em;
   text-align: justify;
   color: var(--ink-soft);

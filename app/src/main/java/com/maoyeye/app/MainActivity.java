@@ -2,9 +2,11 @@ package com.maoyeye.app;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -57,19 +59,29 @@ public class MainActivity extends Activity {
 
         setContentView(root);
 
-        final FrameLayout container = root;
-        container.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+        // 必须在 setContentView 之后：Android 17 上 DecorView 尚未创建时
+        // PhoneWindow.getInsetsController() 会抛 NPE。
+        applySystemBarAppearance();
+
+        root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override
             public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
                 int top = 0;
                 int bottom = 0;
                 if (Build.VERSION.SDK_INT >= 30) {
-                    android.graphics.Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
+                    Insets bars = insets.getInsets(
+                            WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
                     top = bars.top;
                     bottom = bars.bottom;
-                } else if (Build.VERSION.SDK_INT >= 20) {
+                } else {
                     top = insets.getSystemWindowInsetTop();
                     bottom = insets.getSystemWindowInsetBottom();
+                    if (Build.VERSION.SDK_INT >= 28) {
+                        DisplayCutout cutout = insets.getDisplayCutout();
+                        if (cutout != null) {
+                            top = Math.max(top, cutout.getSafeInsetTop());
+                        }
+                    }
                 }
                 if (top > 0 || bottom > 0) {
                     v.setPadding(0, top, 0, bottom);
@@ -77,7 +89,7 @@ public class MainActivity extends Activity {
                 return insets;
             }
         });
-        container.requestApplyInsets();
+        root.requestApplyInsets();
 
         webView.loadUrl(updater.activeIndexUrl());
         checkHotUpdate();
@@ -92,12 +104,6 @@ public class MainActivity extends Activity {
 
         if (Build.VERSION.SDK_INT >= 30) {
             getWindow().setDecorFitsSystemWindows(false);
-            WindowInsetsController controller = getWindow().getInsetsController();
-            if (controller != null) {
-                int mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                        | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
-                controller.setSystemBarsAppearance(mask, mask);
-            }
         } else {
             int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -107,6 +113,19 @@ public class MainActivity extends Activity {
                 flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             }
             getWindow().getDecorView().setSystemUiVisibility(flags);
+        }
+    }
+
+    private void applySystemBarAppearance() {
+        if (Build.VERSION.SDK_INT < 30) return;
+        WindowInsetsController controller = getWindow().getInsetsController();
+        if (controller == null) {
+            controller = getWindow().getDecorView().getWindowInsetsController();
+        }
+        if (controller != null) {
+            int mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+            controller.setSystemBarsAppearance(mask, mask);
         }
     }
 

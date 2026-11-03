@@ -46,6 +46,27 @@
   }
   hintEl.textContent = defaultHint();
 
+  // 编者注只保留第一句，过长时在标点处收口，避免整屏都是背景介绍
+  var NOTE_LIMIT = 52;
+
+  function shortNote(text) {
+    var t = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!t) return '';
+    if (t.length <= NOTE_LIMIT) return t;
+    var m = t.match(/^[^。！？]{1,90}[。！？]/);
+    var first = m ? m[0] : t;
+    if (first.length <= NOTE_LIMIT) return first;
+    var cut = first.slice(0, NOTE_LIMIT - 1);
+    var idx = Math.max(
+      cut.lastIndexOf('，'),
+      cut.lastIndexOf('、'),
+      cut.lastIndexOf('；'),
+      cut.lastIndexOf('：')
+    );
+    if (idx >= 20) cut = cut.slice(0, idx);
+    return cut.replace(/[，、；：]$/, '') + '…';
+  }
+
   function metaText() {
     return '已读 ' + engine.historyLength() + ' 条' + (webVersion > 0 ? ' · v' + webVersion : '');
   }
@@ -68,14 +89,15 @@
     attribDateEl.textContent = article.d ? '（' + article.d + '）' : '';
     attribDateEl.style.display = article.d ? '' : 'none';
 
-    if (article.n) {
+    var note = shortNote(article.n);
+    if (note) {
       noteBlock.style.display = '';
-      noteEl.textContent = article.n;
+      noteEl.textContent = note;
     } else {
       noteBlock.style.display = 'none';
     }
 
-    metaEl.textContent = '已读 ' + engine.historyLength() + ' 条';
+    metaEl.textContent = metaText();
     prevBtn.disabled = !engine.canPrev();
     cardEl.scrollTop = 0;
 
