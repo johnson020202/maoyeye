@@ -101,6 +101,12 @@ public class MainActivity extends Activity {
             getWindow().setStatusBarColor(Color.TRANSPARENT);
             getWindow().setNavigationBarColor(Color.TRANSPARENT);
         }
+        if (Build.VERSION.SDK_INT >= 29) {
+            // 关闭系统给透明导航栏/状态栏自动加的对比度蒙层，
+            // 否则手势条区域会比网页背景暗一截。
+            getWindow().setNavigationBarContrastEnforced(false);
+            getWindow().setStatusBarContrastEnforced(false);
+        }
 
         if (Build.VERSION.SDK_INT >= 30) {
             getWindow().setDecorFitsSystemWindows(false);

@@ -24,10 +24,11 @@
 html, body { height: 100%; }
 
 body {
+  /* 首尾必须是 #f2e8d5：原生壳用这个纯色给状态栏/导航栏留白，
+     网页渐变若在边缘偏亮或偏暗，就会和系统栏形成明显色差。 */
   background:
-    radial-gradient(120% 90% at 0% 0%, #fbf3e4 0%, transparent 55%),
-    radial-gradient(110% 80% at 100% 100%, #e2d0ae 0%, transparent 60%),
-    linear-gradient(165deg, var(--bg-1), var(--bg-2));
+    radial-gradient(80% 30% at 50% 45%, rgba(255, 255, 255, 0.4) 0%, transparent 75%),
+    linear-gradient(180deg, #f2e8d5 0%, #eee0c4 50%, #f2e8d5 100%);
   color: var(--ink);
   font-family: var(--font);
   overscroll-behavior: none;
@@ -44,8 +45,7 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    repeating-linear-gradient(0deg, rgba(120, 95, 60, 0.022) 0 1px, transparent 1px 3px),
-    radial-gradient(80% 60% at 50% 0%, rgba(255, 255, 255, 0.35), transparent 60%);
+    repeating-linear-gradient(0deg, rgba(120, 95, 60, 0.022) 0 1px, transparent 1px 3px);
   z-index: 0;
 }
 
